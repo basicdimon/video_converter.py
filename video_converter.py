@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Пакетный конвертер видео в MP3
-Автор: Developer
+Автор: basic-dimon
 Описание: GUI приложение для конвертации множественных видео файлов в аудио формат MP3
 """
 
@@ -11,11 +11,7 @@ from tkinter import ttk, filedialog, messagebox
 import os
 import threading
 from pathlib import Path
-try:
-    from moviepy.video.io.VideoFileClip import VideoFileClip
-except ImportError:
-    messagebox.showerror("Ошибка", "Не установлена библиотека moviepy. Установите: pip install moviepy")
-    exit(1)
+# moviepy будет импортироваться при необходимости
 
 class VideoToMP3Converter:
     def __init__(self, root):
@@ -176,6 +172,17 @@ class VideoToMP3Converter:
         
     def convert_videos(self):
         """Конвертация видео файлов"""
+        # Импорт moviepy при необходимости
+        try:
+            from moviepy.video.io.VideoFileClip import VideoFileClip
+        except ImportError as e:
+            error_msg = "Ошибка импорта moviepy. Убедитесь, что библиотека установлена правильно."
+            self.root.after(0, lambda: messagebox.showerror("Ошибка", error_msg))
+            self.root.after(0, lambda: self.status_label.configure(text="Ошибка: moviepy не найдена"))
+            self.is_converting = False
+            self.root.after(0, lambda: self.convert_button.configure(state="normal"))
+            return
+            
         total_files = len(self.video_files)
         successful_conversions = 0
         failed_conversions = []
